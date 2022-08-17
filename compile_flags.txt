@@ -1,0 +1,25 @@
+-std=gnu89
+-D__KERNEL__
+-DMODULE
+-nostdinc
+-I/usr/src/linux-rpi/include
+-I/usr/src/linux-rpi/include/uapi
+-I/usr/src/linux-rpi/include/generated
+-I/usr/src/linux-rpi/include/generated/uapi
+-I/usr/src/linux-rpi/arch/arm64/include
+-I/usr/src/linux-rpi/arch/arm64/include/uapi
+-I/usr/src/linux-rpi/arch/arm64/include/generated
+-I/usr/src/linux-rpi/arch/arm64/include/generated/uapi
+-include /usr/src/linux-rpi/include/linux/kconfig.h
+-include /usr/src/linux-rpi/include/linux/compiler_types.h
+-Wall
+-Wundef
+-Wstrict-prototypes
+-Wno-trigraphs
+-Werror-implicit-function-declaration
+-Wno-format-security
+-Werror=implicit-int
+-Werror=strict-prototypes
+-Werror=date-time
+-Werror=incompatible-pointer-types
+-Werror=designated-init

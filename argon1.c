@@ -10,7 +10,7 @@
 
 #define SUCCESS 0
 
-#define ARGON1_DEVICE_NAME "argon1-fan"
+#define ARGON1_DEVICE_NAME "argon1"
 
 static struct i2c_device_id const argon1_i2c_id_table[] = {
 	{ ARGON1_DEVICE_NAME, 0 },
@@ -100,6 +100,7 @@ static struct i2c_driver argon1_i2c_driver = {
 	.address_list = argon1_i2c_address_list,
 	.shutdown = argon1_i2c_shutdown,
 };
+module_i2c_driver(argon1_i2c_driver);
 
 struct argon1_i2c_data {
 	struct thermal_cooling_device *cl_dev;
@@ -121,6 +122,15 @@ static int argon1_i2c_probe(struct i2c_client *client)
 	if (!data)
 		return -ENOMEM;
 
+	err = i2c_smbus_write_byte(client, 0);
+	if (err)
+		return err;
+
+	data->throttle = 0;
+
+	/* The data is set before registering any of these device since once a device is registered, then coresponding callbacks will be called and they would find out data is NULL. */
+	i2c_set_clientdata(client, data);
+
 	data->hwmon_dev = devm_hwmon_device_register_with_groups(dev, ARGON1_DEVICE_NAME, client, argon1_i2c_groups);
 	if (IS_ERR(data->hwmon_dev))
 		return PTR_ERR(data->hwmon_dev);
@@ -128,15 +138,6 @@ static int argon1_i2c_probe(struct i2c_client *client)
 	data->cl_dev = devm_thermal_of_cooling_device_register(dev, np, "argon1-fan", client, &argon1_i2c_cl_dev_ops);
 	if (IS_ERR(data->cl_dev))
 		return PTR_ERR(data->cl_dev);
-
-	err = i2c_smbus_write_byte(client, 0);
-	if (err)
-		return err;
-
-	data->throttle = 0;
-
-	/* If everything works well, attach driver data to the client. */
-	i2c_set_clientdata(client, data);
 
 	return SUCCESS;
 }
@@ -179,7 +180,7 @@ static int argon1_i2c_resume(struct device *device)
 	return SUCCESS;
 }
 
-#ifdef CONFIG_ARGON1_AUTODETECT
+#if 0
 static int argon1_i2c_detect(struct i2c_client *client, struct i2c_board_info *info)
 {
 	int ret;
@@ -237,8 +238,8 @@ static ssize_t argon1_i2c_attr_fan1_target_store(struct device *device, struct d
 
 	client = dev_get_drvdata(device);
 
-	err = i2c_smbus_write_byte_data(client, 0, target);
-	if (err < 0)
+	err = i2c_smbus_write_byte(client, target);
+	if (err)
 		return err;
 
 	data = i2c_get_clientdata(client);
@@ -276,7 +277,7 @@ static int argon1_i2c_set_cur_state(struct thermal_cooling_device *device, unsig
 
 	client = device->devdata;
 	err = i2c_smbus_write_byte(client, target);
-	if (err < 0)
+	if (err)
 		return err;
 
 	data = i2c_get_clientdata(client);
@@ -285,28 +286,6 @@ static int argon1_i2c_set_cur_state(struct thermal_cooling_device *device, unsig
 	return SUCCESS;
 }
 
-static int argon1_gpio_probe(struct platform_device *device);
-
-static struct platform_driver argon1_gpio_driver = {
-	.probe = argon1_gpio_probe,
-};
-
-static int argon1_gpio_probe(struct platform_device *device)
-{
-}
-
-static int __init argon1_init(void)
-{
-	return i2c_add_driver(&argon1_i2c_driver);
-}
-module_init(argon1_init);
-
-static void __exit argon1_exit(void)
-{
-	i2c_del_driver(&argon1_i2c_driver);
-}
-module_exit(argon1_exit);
-
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Tony Fettes <tonyfettes@tonyfettes.com>");
-MODULE_DESCRIPTION("Driver for Argon One case for Raspberry Pi");
+MODULE_DESCRIPTION("Driver for Argon ONE case for Raspberry Pi");

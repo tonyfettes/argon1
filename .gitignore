@@ -1,0 +1,11 @@
+# Compiled device tree.
+*.dtbo
+
+# Compiled module
+*.o
+*.mod
+*.mod.c
+Module.symvers
+modules.order
+*.ko
+.*.cmd
