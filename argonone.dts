@@ -1,0 +1,78 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "raspberrypi,4-model-b", "brcm,bcm2711";
+
+	fragment@0 {
+		target = <&i2c_arm>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+
+			argonone_fan: argonone-fan@1a {
+				compatible = "argon40,argonone-fan";
+				reg = <0x1a>;
+				status = "okay";
+				#cooling-cells = <0x02>;
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&cpu_thermal>;
+		polling-delay = <2000>;
+		__overlay__ {
+			cpu_trips: trips {
+				cpu_alert0: cpu_alert {
+					temperature = <50000>;
+					hysteresis = <2000>;
+					type = "active";
+				};
+			};
+			cpu_cooling_maps: cooling-maps {
+				map0 {
+					trip = <&cpu_alert0>;
+					cooling-device = <&argonone_fan 10 50>;
+				};
+			};
+		};
+	};
+
+	fragment@2 {
+		target = <&gpio>;
+		__overlay__ {
+			argonone_button_pin: argonone_button_pin {
+				brcm,pins = <4>;
+				brcm,function = <0>; // Input
+				brcm,pull = <1>; // Pull down
+			};
+		};
+	};
+
+	fragment@3 {
+		target-path = "/";
+		__overlay__ {
+			argonone_button: argonone-button {
+				compatible = "argon40,argonone-button";
+				pinctrl-names = "default";
+				pinctrl-0 = <&argonone_button_pin>;
+				status = "okay";
+				gpios = <&gpio 4 0>;
+				wakeup-source;
+			};
+
+			/* argonone_button: argonone_button { */
+			/* 	compatible = "argonone-gpio-keys"; */
+			/* 	pinctrl-names = "default"; */
+			/* 	pinctrl-0 = <&argonone_button_pin>; */
+			/* 	key: key { */
+			/* 		linux,code = <88>; */
+			/* 		gpios = <&gpio 4 0>; */
+			/* 		wakeup-source; */
+			/* 	}; */
+			/* }; */
+		};
+	};
+};

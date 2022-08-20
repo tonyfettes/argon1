@@ -1,10 +1,9 @@
-obj-m += argon1.o
+obj-m += argonone-fan.o argonone-button.o argonone-gpio-keys.o
+
+KDIR ?= /lib/modules/`uname -r`/build
 
 all:
-	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
-
-dt:
-	dtc -I dts -O dtb -o argon1.dtbo argon1.dts
+	make -C $(KDIR) M=$(PWD) modules
 
 clean:
-	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+	make -C $(KDIR) M=$(PWD) clean
