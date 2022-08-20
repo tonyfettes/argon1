@@ -62,17 +62,6 @@
 				gpios = <&gpio 4 0>;
 				wakeup-source;
 			};
-
-			/* argonone_button: argonone_button { */
-			/* 	compatible = "argonone-gpio-keys"; */
-			/* 	pinctrl-names = "default"; */
-			/* 	pinctrl-0 = <&argonone_button_pin>; */
-			/* 	key: key { */
-			/* 		linux,code = <88>; */
-			/* 		gpios = <&gpio 4 0>; */
-			/* 		wakeup-source; */
-			/* 	}; */
-			/* }; */
 		};
 	};
 };
